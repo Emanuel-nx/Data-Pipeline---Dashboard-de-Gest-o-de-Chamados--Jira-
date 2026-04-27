@@ -60,31 +60,22 @@ SELECT
     STATUS,
     RESOLUCAO,
     SATISFACAO_DO_CLIENTE,
+    -- 1. Data de Criação
+    STR_TO_DATE(LEFT(REPLACE(NULLIF(TRIM(CRIADO), ''), 'T', ' '), 19), '%Y-%m-%d %H:%i:%s') AS DATA_CRIACAO,
     
-    -- Tratamento dinâmico para Data de Criação
-    CASE 
-        WHEN CRIADO = '' OR CRIADO IS NULL THEN NULL 
-        ELSE STR_TO_DATE(LEFT(REPLACE(CRIADO, 'T', ' '), 19), '%Y-%m-%d %H:%i:%s') 
-    END AS DATA_CRIACAO,
-
-    -- Tratamento dinâmico para Data de Resolução
-    CASE 
-        WHEN RESOLVIDO = '' OR RESOLVIDO IS NULL THEN NULL
-        ELSE STR_TO_DATE(LEFT(REPLACE(RESOLVIDO, 'T', ' '), 19), '%Y-%m-%d %H:%i:%s') 
-    END AS DATA_RESOLUCAO,
-
-    -- Tratamento para Transição de Status
-    CASE 
-        WHEN DATA_TRANSICAO_STATUS = '' OR DATA_TRANSICAO_STATUS IS NULL THEN NULL 
-        ELSE STR_TO_DATE(LEFT(REPLACE(DATA_TRANSICAO_STATUS, 'T', ' '), 19), '%Y-%m-%d %H:%i:%s') 
-    END AS DATA_TRANSICAO_DE_STATUS,
-
-    -- CÁLCULO DE SLA: Diferença em horas entre criação e resolução
+    -- 2. Data de Resolução
+    STR_TO_DATE(LEFT(REPLACE(NULLIF(TRIM(RESOLVIDO), ''), 'T', ' '), 19), '%Y-%m-%d %H:%i:%s') AS DATA_RESOLUCAO,
+    
+    -- 3. Data de Transição (Adicionada a vírgula aqui)
+    STR_TO_DATE(LEFT(REPLACE(NULLIF(TRIM(DATA_TRANSICAO_STATUS), ''), 'T', ' '), 19), '%Y-%m-%d %H:%i:%s') AS DATA_TRANSICAO_DE_STATUS,
+    
+    -- 4. Cálculo de horas (Adicionada a vírgula aqui)
     TIMESTAMPDIFF(HOUR, 
-        STR_TO_DATE(LEFT(REPLACE(CRIADO, 'T', ' '), 19), '%Y-%m-%d %H:%i:%s'),
-        STR_TO_DATE(LEFT(REPLACE(RESOLVIDO, 'T', ' '), 19), '%Y-%m-%d %H:%i:%s')
-    ) AS SLA_HORAS,
-
+        STR_TO_DATE(LEFT(REPLACE(NULLIF(TRIM(CRIADO), ''), 'T', ' '), 19), '%Y-%m-%d %H:%i:%s'),
+        STR_TO_DATE(LEFT(REPLACE(NULLIF(TRIM(RESOLVIDO), ''), 'T', ' '), 19), '%Y-%m-%d %H:%i:%s')
+    ) AS HORAS_PARA_RESOLVER,
+    
+    -- 5. Demais colunas (Vírgula antes de TEMPO_ATE_RESOLUCAO)
     TEMPO_ATE_RESOLUCAO,
     ULTIMO_STATUS_ORIGEM,
     ULTIMO_STATUS_DESTINO,
